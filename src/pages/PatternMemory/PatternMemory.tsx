@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { patterns } from './patternData';
 import './PatternMemory.css';
-import { Box, Typography, Grid, Card, CardActionArea, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Button, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Grid, Card, CardActionArea, Dialog, DialogTitle, DialogContent, DialogActions, Button, Snackbar, Alert } from '@mui/material';
 
 function shuffle<T>(arr: T[]): T[] {
   return arr.slice().sort(() => Math.random() - 0.5);
@@ -46,20 +46,49 @@ export default function PatternMemory() {
   return (
     <Box className="memory-game-container" sx={{ p: 2 }}>
       <Typography variant="h4" align="center" gutterBottom>契丹纹样翻翻看</Typography>
-      <Grid container spacing={2} justifyContent="center" className="cards-grid">
+      <Grid container spacing={2} justifyContent="center" className="cards-grid" sx={{ maxWidth: 800, mx: 'auto' }}>
         {cards.map((card, idx) => (
-          <Grid item xs={3} sm={2} md={1.5} key={card.key}>
-            <Card>
+          <Grid item xs={4} sm={3} md={2} key={card.key}>
+            <Card 
+              sx={{ 
+                aspectRatio: '1/1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 3,
+                borderRadius: 2,
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
               <CardActionArea
                 onClick={() => handleFlip(idx)}
                 disabled={flipped.length === 2 || flipped.includes(idx) || matched.includes(card.id)}
-                sx={{ minHeight: 100 }}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: flipped.includes(idx) || matched.includes(card.id) ? 'background.paper' : 'grey.300',
+                  borderRadius: 2,
+                  transition: 'background 0.3s',
+                }}
               >
-                <Box sx={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: (flipped.includes(idx) || matched.includes(card.id)) ? 'background.paper' : 'grey.300' }}>
-                  {(flipped.includes(idx) || matched.includes(card.id)) ? (
-                    <img src={card.img} alt="pattern" style={{ maxHeight: 60, maxWidth: '100%' }} />
-                  ) : null}
-                </Box>
+                {(flipped.includes(idx) || matched.includes(card.id)) ? (
+                  <Box
+                    component="img"
+                    src={card.img}
+                    alt="pattern"
+                    sx={{
+                      width: '80%',
+                      height: '80%',
+                      objectFit: 'contain',
+                      display: 'block',
+                      mx: 'auto',
+                    }}
+                  />
+                ) : null}
               </CardActionArea>
             </Card>
           </Grid>
