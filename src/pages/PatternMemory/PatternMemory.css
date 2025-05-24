@@ -1,0 +1,78 @@
+.memory-game-container {
+  padding: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.card {
+  width: 70px;
+  height: 90px;
+  perspective: 600px;
+  cursor: pointer;
+  position: relative;
+}
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px #0001;
+}
+.card-front {
+  background: #e5e7eb;
+}
+.card-back {
+  transform: rotateY(180deg);
+  background: #fff;
+}
+.card.flipped .card-front {
+  transform: rotateY(180deg);
+}
+.card.flipped .card-back {
+  transform: rotateY(0deg);
+}
+.card img {
+  width: 90%;
+  height: 80%;
+  object-fit: contain;
+}
+.desc-popup {
+  position: fixed;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px #0002;
+  padding: 24px 16px;
+  z-index: 10;
+}
+.reward-popup {
+  margin-top: 20px;
+  background: #16a34a;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+@media (max-width: 600px) {
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .card {
+    width: 56px;
+    height: 70px;
+  }
+} 

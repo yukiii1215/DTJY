@@ -1,0 +1,35 @@
+.intro-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.carousel-item {
+  min-width: 200px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.carousel-item img {
+  width: 100%;
+  border-radius: 8px;
+}
+.intro-text {
+  margin: 16px 0;
+  font-size: 1.1em;
+}
+.media-section {
+  margin-top: 16px;
+}
+@media (max-width: 600px) {
+  .intro-container {
+    padding: 8px;
+  }
+  .carousel-item {
+    min-width: 140px;
+  }
+} 
