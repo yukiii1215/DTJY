@@ -144,12 +144,12 @@ const CustomDatongArt: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom>画布（可自由绘制或上传图片）</Typography>
-            <Box sx={{ border: '1px solid #eee', borderRadius: 2, width: CANVAS_WIDTH, height: CANVAS_HEIGHT, bgcolor: '#fff', mb: 2, mx: 'auto' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <ReactSketchCanvas
                 ref={canvasRef}
-                width={`${CANVAS_WIDTH}`}
-                height={`${CANVAS_HEIGHT}`}
-                style={{ borderRadius: 8, boxShadow: '0 1px 4px #eee' }}
+                width="320"
+                height="320"
+                style={{ borderRadius: 8, boxShadow: '0 1px 4px #eee', border: '1px solid #eee' }}
                 strokeWidth={3}
                 strokeColor="#333"
                 backgroundImage={uploadImage || undefined}
