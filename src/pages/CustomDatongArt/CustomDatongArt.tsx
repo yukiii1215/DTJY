@@ -66,14 +66,12 @@ const CustomDatongArt: React.FC = () => {
     setError(null);
     setImg(null);
     let imageBase64 = null;
-    // 优先画布内容，其次上传图片
+    // 直接导出画布内容
     if (canvasRef.current) {
-      const isEmpty = await canvasRef.current.isEmpty();
-      if (!isEmpty) {
+      try {
         const dataUrl = await canvasRef.current.exportImage('png');
-        // 去掉前缀
         imageBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-      }
+      } catch (e) {}
     }
     if (!imageBase64 && uploadImage) {
       imageBase64 = uploadImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
