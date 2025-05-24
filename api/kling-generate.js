@@ -1,11 +1,9 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-// const jwt = require('jsonwebtoken');
 const jwt = require('jsonwebtoken');
 
 const ACCESS_KEY_ID = process.env.KLING_ACCESS_KEY_ID;
 const ACCESS_KEY_SECRET = process.env.KLING_ACCESS_KEY_SECRET;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -30,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const finalPrompt = prompt && style ? `${style}，${prompt}` : prompt || '';
 
   // 3. 构造请求体
-  const body: any = {
+  const body = {
     prompt: finalPrompt,
     aspect_ratio: '1:1',
     n: 1,
@@ -52,4 +50,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const data = await apiRes.json();
   res.status(apiRes.status).json(data);
-} 
+}; 
