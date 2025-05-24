@@ -1,8 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import jwt from 'jsonwebtoken';
+// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-const ACCESS_KEY_ID = process.env.KLING_ACCESS_KEY_ID!;
-const ACCESS_KEY_SECRET = process.env.KLING_ACCESS_KEY_SECRET!;
+const ACCESS_KEY_ID = process.env.KLING_ACCESS_KEY_ID;
+const ACCESS_KEY_SECRET = process.env.KLING_ACCESS_KEY_SECRET;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
