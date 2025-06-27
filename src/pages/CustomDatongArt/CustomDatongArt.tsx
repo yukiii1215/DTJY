@@ -69,6 +69,7 @@ const NativeCanvas: React.FC<{ onExport: (base64: string) => void, uploadImage: 
     const ctx = canvasRef.current?.getContext('2d');
     if (ctx) {
       ctx.beginPath();
+      if (!canvasRef.current) return;
       const rect = canvasRef.current.getBoundingClientRect();
       ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
     }
@@ -77,7 +78,8 @@ const NativeCanvas: React.FC<{ onExport: (base64: string) => void, uploadImage: 
     if (!drawing) return;
     const ctx = canvasRef.current?.getContext('2d');
     if (ctx) {
-      const rect = canvasRef.current.getBoundingClientRect();
+      if (!canvasRef.current) return;
+const rect = canvasRef.current.getBoundingClientRect();
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 3;
