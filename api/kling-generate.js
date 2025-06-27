@@ -4,6 +4,8 @@ const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY;
 const KLING_ACCESS_SECRET = process.env.KLING_ACCESS_SECRET;
 const BASE_URL = 'https://api-beijing.klingai.com';
 
+console.log('KLING_ACCESS_KEY:', KLING_ACCESS_KEY, 'KLING_ACCESS_SECRET:', KLING_ACCESS_SECRET);
+
 // 工具函数：生成JWT Token
 function generateToken() {
   const now = Math.floor(Date.now() / 1000);
