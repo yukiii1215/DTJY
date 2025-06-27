@@ -43,6 +43,80 @@ async function hasEnoughValidPixels(base64: string, minCount = 1000): Promise<bo
   });
 }
 
+// 新增：原生Canvas组件
+const NativeCanvas: React.FC<{ onExport: (base64: string) => void, uploadImage: string | null }> = ({ onExport, uploadImage }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [drawing, setDrawing] = useState(false);
+
+  // 加载上传图片为背景
+  React.useEffect(() => {
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      if (uploadImage) {
+        const img = new window.Image();
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        };
+        img.src = uploadImage;
+      }
+    }
+  }, [uploadImage]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDrawing(true);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      ctx.beginPath();
+      const rect = canvasRef.current.getBoundingClientRect();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!drawing) return;
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+  };
+  const handleMouseUp = () => setDrawing(false);
+  const handleClear = () => {
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+  };
+  const handleExport = () => {
+    const base64 = canvasRef.current?.toDataURL('image/jpeg', 0.92).replace(/^data:image\/jpeg;base64,/, '');
+    if (base64) onExport(base64);
+  };
+  return (
+    <div>
+      <canvas
+        ref={canvasRef}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        style={{ border: '1px solid #eee', borderRadius: 8, background: '#fff', cursor: 'crosshair' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+        <Button variant="outlined" color="secondary" onClick={handleClear}>清空画布</Button>
+        <Button variant="outlined" color="info" onClick={handleExport}>预览画布</Button>
+      </div>
+    </div>
+  );
+};
+
 const CustomDatongArt: React.FC = () => {
   const [style, setStyle] = useState(kitanStyles[0]);
   const [prompt, setPrompt] = useState('');
@@ -51,6 +125,7 @@ const CustomDatongArt: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [canvasImage, setCanvasImage] = useState<string | null>(null); // base64
   const [uploadImage, setUploadImage] = useState<string | null>(null); // base64
+  const [canvasBase64, setCanvasBase64] = useState<string | null>(null);
   const canvasRef = useRef<any>(null);
 
   // 拼接最终prompt
@@ -96,75 +171,14 @@ const CustomDatongArt: React.FC = () => {
   const handleGenerate = async () => {
     setError(null);
     setImg(null);
-    let imageBase64 = null;
+    let imageBase64 = canvasBase64;
     let aspectRatio = '1:1'; // 默认
-    // 直接导出画布内容
-    if (canvasRef.current) {
-      try {
-        // 先导出PNG
-        const dataUrl = await canvasRef.current.exportImage('png');
-        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-        if (dataUrl.length < 1000) {
-          setError('请在画布上绘制内容后再生成');
-          setLoading(false);
-          return;
-        }
-        // 新增：像素数量检测
-        const enough = await hasEnoughValidPixels(base64, 1000);
-        if (!enough) {
-          setError('请多画一些内容后再生成（建议线条粗一些、面积大一些）');
-          setLoading(false);
-          return;
-        }
-        // 新增：将PNG转为JPEG，确保无透明像素
-        const img = new window.Image();
-        img.src = dataUrl;
-        await new Promise((resolve) => { img.onload = resolve; });
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        // 自动设置 aspect_ratio
-        if (canvas.width && canvas.height) {
-          const ratio = canvas.width / canvas.height;
-          if (Math.abs(ratio - 1) < 0.01) aspectRatio = '1:1';
-          else if (Math.abs(ratio - 16/9) < 0.01) aspectRatio = '16:9';
-          else if (Math.abs(ratio - 4/3) < 0.01) aspectRatio = '4:3';
-          else if (Math.abs(ratio - 3/2) < 0.01) aspectRatio = '3:2';
-          else if (Math.abs(ratio - 2/3) < 0.01) aspectRatio = '2:3';
-          else if (Math.abs(ratio - 3/4) < 0.01) aspectRatio = '3:4';
-          else if (Math.abs(ratio - 9/16) < 0.01) aspectRatio = '9:16';
-          else if (Math.abs(ratio - 21/9) < 0.01) aspectRatio = '21:9';
-        }
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height); // 白色背景
-          ctx.drawImage(img, 0, 0);
-          // 尝试导出为JPEG
-          const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-          imageBase64 = jpegDataUrl.replace(/^data:image\/jpeg;base64,/, '');
-        } else {
-          imageBase64 = base64;
-        }
-      } catch (e) {}
-    }
+    // 只用canvasBase64
     if (!imageBase64 && uploadImage) {
-      // 校验上传图片base64长度
+      // 兼容直接上传图片
       const base64 = uploadImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
-      if (base64.length < 1000) {
-        setError('上传的图片内容无效，请更换图片');
-        setLoading(false);
-        return;
-      }
-      // 新增：像素数量检测
-      const enough = await hasEnoughValidPixels(base64, 1000);
-      if (!enough) {
-        setError('上传的图片内容无效，请更换图片（建议内容丰富一些）');
-        setLoading(false);
-        return;
-      }
       imageBase64 = base64;
-      // 上传图片时也自动设置 aspect_ratio
+      // ...宽高比检测同前...
       const img = new window.Image();
       img.src = 'data:image/png;base64,' + base64;
       await new Promise((resolve) => { img.onload = resolve; });
@@ -251,24 +265,7 @@ const CustomDatongArt: React.FC = () => {
           <Paper sx={{ p: 2, mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom>画布（可自由绘制或上传图片）</Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <ReactSketchCanvas
-                ref={canvasRef}
-                width="320"
-                height="320"
-                style={{ borderRadius: 8, boxShadow: '0 1px 4px #eee', border: '1px solid #eee' }}
-                strokeWidth={3}
-                strokeColor="#333"
-                backgroundImage={uploadImage || undefined}
-          
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <Button variant="outlined" color="secondary" onClick={handleClear}>清空画布</Button>
-              <Button variant="outlined" component="label" color="primary">
-                上传图片
-                <input type="file" accept="image/*" hidden onChange={handleUpload} />
-              </Button>
-              <Button variant="outlined" color="info" onClick={handleSaveCanvas}>预览画布</Button>
+              <NativeCanvas onExport={setCanvasBase64} uploadImage={uploadImage} />
             </Box>
             {canvasImage && (
               <Box sx={{ mt: 1, textAlign: 'center' }}>
