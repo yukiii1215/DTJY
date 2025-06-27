@@ -46,27 +46,29 @@ module.exports = async (req, res) => {
 
   // 2. 创建任务
   if (req.method === 'POST') {
-    const { prompt, style, image } = req.body;
+    const {
+      prompt, image, model_name, aspect_ratio, resolution, n,
+      negative_prompt, image_reference, image_fidelity, human_fidelity, callback_url
+    } = req.body;
     if (!prompt && !image) {
       res.status(400).json({ error: '缺少prompt或image参数' });
       return;
     }
-    // 生成JWT Token
     const token = generateToken();
-
-    // 拼接prompt
-    const finalPrompt = prompt && style ? `${style}，${prompt}` : prompt || '';
     const body = {
-      prompt: finalPrompt,
-      aspect_ratio: '1:1',
-      n: 1,
-      model_name: 'kling-v1',
+      prompt,
+      model_name,
+      aspect_ratio,
+      resolution,
+      n,
+      image,
+      negative_prompt,
+      image_reference,
+      image_fidelity,
+      human_fidelity,
+      callback_url,
     };
-    if (image) {
-      body.image = image;
-    }
-
-    // 创建任务
+    Object.keys(body).forEach(key => body[key] === undefined && delete body[key]);
     const apiRes = await fetch(`${BASE_URL}/v1/images/generations`, {
       method: 'POST',
       headers: {
@@ -75,7 +77,6 @@ module.exports = async (req, res) => {
       },
       body: JSON.stringify(body),
     });
-
     const data = await apiRes.json();
     res.status(apiRes.status).json(data);
     return;
