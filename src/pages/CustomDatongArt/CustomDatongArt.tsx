@@ -259,7 +259,7 @@ const CustomDatongArt: React.FC = () => {
                 strokeWidth={3}
                 strokeColor="#333"
                 backgroundImage={uploadImage || undefined}
-                backgroundColor="#fff"
+          
               />
             </Box>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
