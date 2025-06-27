@@ -70,11 +70,24 @@ const CustomDatongArt: React.FC = () => {
     if (canvasRef.current) {
       try {
         const dataUrl = await canvasRef.current.exportImage('png');
+        // 检查 base64 长度，简单判断是否为空画布
+        if (dataUrl.length < 1000) {
+          setError('请在画布上绘制内容后再生成');
+          setLoading(false);
+          return;
+        }
         imageBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
       } catch (e) {}
     }
     if (!imageBase64 && uploadImage) {
-      imageBase64 = uploadImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+      // 校验上传图片base64长度
+      const base64 = uploadImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+      if (base64.length < 1000) {
+        setError('上传的图片内容无效，请更换图片');
+        setLoading(false);
+        return;
+      }
+      imageBase64 = base64;
     }
     if (!prompt.trim() && !imageBase64) {
       setError('请输入创意描述或绘制/上传图片');
