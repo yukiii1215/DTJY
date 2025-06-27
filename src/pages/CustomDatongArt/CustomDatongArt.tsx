@@ -88,8 +88,8 @@ const CustomDatongArt: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          type: 'generate',
           prompt: getFinalPrompt(),
-          style,
           image: imageBase64 || undefined,
         }),
       });
