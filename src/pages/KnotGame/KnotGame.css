@@ -1,0 +1,37 @@
+.knot-game-container {
+  padding: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+.knot-lottie {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 16px auto;
+}
+.knot-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  font-size: 1.1em;
+  border-radius: 8px;
+  border: none;
+  background: #eab308;
+  color: #fff;
+  cursor: pointer;
+}
+.reward-popup {
+  margin-top: 20px;
+  background: #16a34a;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+@media (max-width: 500px) {
+  .knot-game-container {
+    padding: 8px;
+  }
+  .knot-lottie {
+    max-width: 90vw;
+  }
+} 
