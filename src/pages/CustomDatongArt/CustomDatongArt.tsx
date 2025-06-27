@@ -12,6 +12,39 @@ const kitanStyles = [
 const CANVAS_WIDTH = 320;
 const CANVAS_HEIGHT = 320;
 
+// 检查 base64 PNG 是否有有效像素
+async function hasValidPixels(base64: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = function () {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(false);
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, img.width, img.height).data;
+      let valid = false;
+      for (let i = 0; i < imageData.length; i += 4) {
+        // 检查是否有非白色且非透明像素
+        const [r, g, b, a] = [
+          imageData[i],
+          imageData[i + 1],
+          imageData[i + 2],
+          imageData[i + 3],
+        ];
+        if (a > 0 && !(r === 255 && g === 255 && b === 255)) {
+          valid = true;
+          break;
+        }
+      }
+      resolve(valid);
+    };
+    img.onerror = () => resolve(false);
+    img.src = 'data:image/png;base64,' + base64;
+  });
+}
+
 const CustomDatongArt: React.FC = () => {
   const [style, setStyle] = useState(kitanStyles[0]);
   const [prompt, setPrompt] = useState('');
@@ -70,19 +103,33 @@ const CustomDatongArt: React.FC = () => {
     if (canvasRef.current) {
       try {
         const dataUrl = await canvasRef.current.exportImage('png');
-        // 检查 base64 长度，简单判断是否为空画布
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
         if (dataUrl.length < 1000) {
           setError('请在画布上绘制内容后再生成');
           setLoading(false);
           return;
         }
-        imageBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+        // 新增：像素有效性检测
+        const valid = await hasValidPixels(base64);
+        if (!valid) {
+          setError('画布内容无效，请绘制明显内容后再生成');
+          setLoading(false);
+          return;
+        }
+        imageBase64 = base64;
       } catch (e) {}
     }
     if (!imageBase64 && uploadImage) {
       // 校验上传图片base64长度
       const base64 = uploadImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
       if (base64.length < 1000) {
+        setError('上传的图片内容无效，请更换图片');
+        setLoading(false);
+        return;
+      }
+      // 新增：像素有效性检测
+      const valid = await hasValidPixels(base64);
+      if (!valid) {
         setError('上传的图片内容无效，请更换图片');
         setLoading(false);
         return;
