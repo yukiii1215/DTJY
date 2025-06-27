@@ -64,6 +64,40 @@ const NativeCanvas: React.FC<{ onExport: (base64: string) => void, uploadImage: 
     }
   }, [uploadImage]);
 
+  // 移动端触摸事件
+  const getTouchPos = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!canvasRef.current) return { x: 0, y: 0 };
+    const rect = canvasRef.current.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    };
+  };
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setDrawing(true);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      ctx.beginPath();
+      const { x, y } = getTouchPos(e);
+      ctx.moveTo(x, y);
+    }
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!drawing) return;
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      const { x, y } = getTouchPos(e);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+    e.preventDefault(); // 防止页面滚动
+  };
+  const handleTouchEnd = () => setDrawing(false);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setDrawing(true);
     const ctx = canvasRef.current?.getContext('2d');
@@ -79,7 +113,7 @@ const NativeCanvas: React.FC<{ onExport: (base64: string) => void, uploadImage: 
     const ctx = canvasRef.current?.getContext('2d');
     if (ctx) {
       if (!canvasRef.current) return;
-const rect = canvasRef.current.getBoundingClientRect();
+      const rect = canvasRef.current.getBoundingClientRect();
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 3;
@@ -110,6 +144,10 @@ const rect = canvasRef.current.getBoundingClientRect();
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       />
       <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
         <Button variant="outlined" color="secondary" onClick={handleClear}>清空画布</Button>
